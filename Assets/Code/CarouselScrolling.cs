@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -7,16 +8,18 @@ using UnityEngine.UI;
 public class CarouselScrolling : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler
 {
     [Header("Refs")]
-    [SerializeField] private ScrollRect scrollRect;
+    [SerializeField] private ScrollRect _scrollRect;
 
     [Header("Auto Scroll")]
-    [SerializeField] private bool autoScroll = true;
-    [SerializeField] private float autoScrollInterval = 5f;
+    [SerializeField] private bool _autoScroll = true;
+    [SerializeField] private float _autoScrollInterval = 5f;
 
     [Header("Snap")]
-    [SerializeField] private float snapDuration = 0.25f;
-    [SerializeField] private float snapEase = 8f; 
-    [SerializeField] private float swipeThresholdNormalized = 0.08f;
+    [SerializeField] private float _snapDuration = 0.25f;
+    [SerializeField] private float _snapEase = 8f; 
+    [SerializeField] private float _swipeThresholdNormalized = 0.08f;
+
+    public event Action<int> PageChanged;
 
     private RectTransform _viewport;
     private RectTransform _content;
@@ -31,13 +34,13 @@ public class CarouselScrolling : MonoBehaviour, IBeginDragHandler, IEndDragHandl
     private Coroutine _snapRoutine;
 
     private void Reset() => 
-        scrollRect = GetComponent<ScrollRect>();
+        _scrollRect = GetComponent<ScrollRect>();
 
     private void Awake()
     {
-        if (!scrollRect) scrollRect = GetComponent<ScrollRect>();
-        _viewport = scrollRect.viewport;
-        _content = scrollRect.content;
+        if (!_scrollRect) _scrollRect = GetComponent<ScrollRect>();
+        _viewport = _scrollRect.viewport;
+        _content = _scrollRect.content;
     }
 
     private void OnEnable()
@@ -49,10 +52,10 @@ public class CarouselScrolling : MonoBehaviour, IBeginDragHandler, IEndDragHandl
 
     private void Update()
     {
-        if (!autoScroll || _dragging || _pageCount <= 1) return;
+        if (!_autoScroll || _dragging || _pageCount <= 1) return;
 
         _autoTimer += Time.unscaledDeltaTime;
-        if (_autoTimer >= autoScrollInterval)
+        if (_autoTimer >= _autoScrollInterval)
         {
             _autoTimer = 0f;
             GoToPage(_currentPage + 1, wrap: true);
@@ -64,6 +67,8 @@ public class CarouselScrolling : MonoBehaviour, IBeginDragHandler, IEndDragHandl
         if (!_content) return;
         _pageCount = _content.childCount;
         _currentPage = Mathf.Clamp(_currentPage, 0, Mathf.Max(0, _pageCount - 1));
+
+        PageChanged?.Invoke(_currentPage);
     }
 
     public void GoToPage(int pageIndex, bool wrap)
@@ -109,7 +114,7 @@ public class CarouselScrolling : MonoBehaviour, IBeginDragHandler, IEndDragHandl
             _viewport, eventData.position, eventData.pressEventCamera, out dragEndLocal);
 
         float dx = dragEndLocal.x - _dragStartLocalPos.x; 
-        float threshold = _viewport.rect.width * swipeThresholdNormalized;
+        float threshold = _viewport.rect.width * _swipeThresholdNormalized;
 
         int target = FindNearestPage();
 
@@ -134,7 +139,9 @@ public class CarouselScrolling : MonoBehaviour, IBeginDragHandler, IEndDragHandl
         float x = -_content.anchoredPosition.x;
 
         int nearest = Mathf.RoundToInt(x / Mathf.Max(1f, pageW));
-        return Mathf.Clamp(nearest, 0, _pageCount - 1);
+        var page = Mathf.Clamp(nearest, 0, _pageCount - 1);
+
+        return page;
     }
 
     private void SnapToPage(int pageIndex, bool immediate)
@@ -143,13 +150,15 @@ public class CarouselScrolling : MonoBehaviour, IBeginDragHandler, IEndDragHandl
 
         if (immediate)
         {
-            scrollRect.StopMovement();
-            scrollRect.horizontalNormalizedPosition = PageToNormalized(pageIndex);
+            _scrollRect.StopMovement();
+            _scrollRect.horizontalNormalizedPosition = PageToNormalized(pageIndex);
             return;
         }
 
         if (_snapRoutine != null) StopCoroutine(_snapRoutine);
         _snapRoutine = StartCoroutine(SnapRoutine(PageToNormalized(pageIndex)));
+
+        PageChanged?.Invoke(pageIndex);
     }
 
     private float PageToNormalized(int pageIndex)
@@ -160,20 +169,20 @@ public class CarouselScrolling : MonoBehaviour, IBeginDragHandler, IEndDragHandl
 
     private IEnumerator SnapRoutine(float targetNormalized)
     {
-        scrollRect.StopMovement();
+        _scrollRect.StopMovement();
 
         float t = 0f;
-        float start = scrollRect.horizontalNormalizedPosition;
+        float start = _scrollRect.horizontalNormalizedPosition;
 
-        while (t < snapDuration)
+        while (t < _snapDuration)
         {
             t += Time.unscaledDeltaTime;
-            float k = 1f - Mathf.Exp(-snapEase * (t / Mathf.Max(0.0001f, snapDuration)));
-            scrollRect.horizontalNormalizedPosition = Mathf.Lerp(start, targetNormalized, k);
+            float k = 1f - Mathf.Exp(-_snapEase * (t / Mathf.Max(0.0001f, _snapDuration)));
+            _scrollRect.horizontalNormalizedPosition = Mathf.Lerp(start, targetNormalized, k);
             yield return null;
         }
 
-        scrollRect.horizontalNormalizedPosition = targetNormalized;
+        _scrollRect.horizontalNormalizedPosition = targetNormalized;
         _snapRoutine = null;
     }
 }
