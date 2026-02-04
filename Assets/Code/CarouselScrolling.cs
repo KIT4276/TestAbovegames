@@ -9,6 +9,8 @@ public class CarouselScrolling : MonoBehaviour, IBeginDragHandler, IEndDragHandl
 {
     [Header("Refs")]
     [SerializeField] private ScrollRect _scrollRect;
+    [SerializeField] private RectTransform _viewport;
+    [SerializeField] private RectTransform _content;
 
     [Header("Auto Scroll")]
     [SerializeField] private bool _autoScroll = true;
@@ -21,8 +23,6 @@ public class CarouselScrolling : MonoBehaviour, IBeginDragHandler, IEndDragHandl
 
     public event Action<int> PageChanged;
 
-    private RectTransform _viewport;
-    private RectTransform _content;
 
     private int _pageCount;
     private int _currentPage;
@@ -33,12 +33,10 @@ public class CarouselScrolling : MonoBehaviour, IBeginDragHandler, IEndDragHandl
 
     private Coroutine _snapRoutine;
 
-    private void Reset() => 
-        _scrollRect = GetComponent<ScrollRect>();
-
     private void Awake()
     {
         if (!_scrollRect) _scrollRect = GetComponent<ScrollRect>();
+
         _viewport = _scrollRect.viewport;
         _content = _scrollRect.content;
     }
@@ -60,6 +58,29 @@ public class CarouselScrolling : MonoBehaviour, IBeginDragHandler, IEndDragHandl
             _autoTimer = 0f;
             GoToPage(_currentPage + 1, wrap: true);
         }
+    }
+
+    public void ResetVerticalPosition()
+    {
+        if (_scrollRect == null || _content == null) return;
+
+        _scrollRect.StopMovement();
+        _scrollRect.velocity = Vector2.zero;
+
+        StartCoroutine(ResetVerticalPositionRoutine());
+    }
+
+    private IEnumerator ResetVerticalPositionRoutine()
+    {
+        yield return null;//не работает
+
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(_content);
+        Canvas.ForceUpdateCanvases();
+
+        _scrollRect.verticalNormalizedPosition = 1f;
+        _scrollRect.StopMovement();
+        _scrollRect.velocity = Vector2.zero;
     }
 
     public void RebuildPages()
