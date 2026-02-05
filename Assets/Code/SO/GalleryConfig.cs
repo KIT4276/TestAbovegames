@@ -6,10 +6,11 @@ public enum GalleryFilter { All, Odd, Even, Non }
 public class GalleryConfig : ScriptableObject
 {
     [Header("Remote")]
-    public string _baseUrl = "http://data.ikppbb.com/test-task-unity-data/pics/";
+    [SerializeField] private string _baseUrl = "https://data.ikppbb.com/test-task-unity-data/pics/";
     [SerializeField] private int _minImages = 1;
     [SerializeField] public int _totalImages = 66;
 
+    public string BaseUrl => _baseUrl;
     public int MinImages => _minImages;
     public int TotalImages => _totalImages;
 

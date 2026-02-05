@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,6 +8,9 @@ public class GalleryUI : MonoBehaviour
     [SerializeField] private Toggle _allToggle;
     [SerializeField] private Toggle _oddToggle;
     [SerializeField] private Toggle _evenToggle;
+    [Space]
+    [SerializeField] private ScrollRect _scrollRect;
+    [SerializeField] private RectTransform _content;
 
     public event Action<GalleryFilter> FilterApplied;
 
@@ -21,9 +25,6 @@ public class GalleryUI : MonoBehaviour
         _evenToggle.onValueChanged.AddListener(OnToggleChanged);
     }
 
-    private void OnToggleChanged(bool arg0) =>
-        ApplyFilter(GetCurrentFilter());
-
     public GalleryFilter GetCurrentFilter()
     {
         if (_allToggle != null && _allToggle.isOn) return GalleryFilter.All;
@@ -33,11 +34,37 @@ public class GalleryUI : MonoBehaviour
         return GalleryFilter.Non;
     }
 
+    private void OnToggleChanged(bool arg0) =>
+        ApplyFilter(GetCurrentFilter());
+
+    public void ResetVerticalPosition()
+    {
+        if (_scrollRect == null || _content == null) return;
+
+        _scrollRect.StopMovement();
+        _scrollRect.velocity = Vector2.zero;
+
+        StartCoroutine(ResetVerticalPositionRoutine());
+    }
+
     private void ApplyFilter(GalleryFilter filter)
     {
         if(_currentFilter == filter) return;
         _currentFilter = filter;
         FilterApplied?.Invoke(filter);
+    }
+
+    private IEnumerator ResetVerticalPositionRoutine()
+    {
+        yield return null;
+
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(_content);
+        Canvas.ForceUpdateCanvases();
+
+        _scrollRect.verticalNormalizedPosition = 1f;
+        _scrollRect.StopMovement();
+        _scrollRect.velocity = Vector2.zero;
     }
 
     private void OnDisable()
@@ -46,15 +73,4 @@ public class GalleryUI : MonoBehaviour
         _oddToggle.onValueChanged.RemoveListener(OnToggleChanged);
         _evenToggle.onValueChanged.RemoveListener(OnToggleChanged);
     }
-}
-
-public class GalleryBuilder : MonoBehaviour
-{
-    [SerializeField] private GalleryElement[] _galleryElements;
-
-    public void OnFilterApplied(GalleryFilter filter)
-    {
-        //спавнит нужное количество, заполняет элементы
-    }
-
 }

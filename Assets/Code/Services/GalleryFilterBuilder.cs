@@ -2,8 +2,6 @@ using System.Collections.Generic;
 
 public class GalleryFilterBuilder
 {
-/// <param name="min"></param> от 1
-/// <param name="total"></param> до 66
     public static List<int> BuildIds(int min, int total, GalleryFilter filter)
     {
         List<int> ids = new List<int>();
@@ -27,7 +25,7 @@ public class GalleryFilterBuilder
                         ok = true;
                     break;
                 default:
-                    ok = true; 
+                    ok = true;
                     break;
             }
 

@@ -60,28 +60,6 @@ public class CarouselScrolling : MonoBehaviour, IBeginDragHandler, IEndDragHandl
         }
     }
 
-    public void ResetVerticalPosition()
-    {
-        if (_scrollRect == null || _content == null) return;
-
-        _scrollRect.StopMovement();
-        _scrollRect.velocity = Vector2.zero;
-
-        StartCoroutine(ResetVerticalPositionRoutine());
-    }
-
-    private IEnumerator ResetVerticalPositionRoutine()
-    {
-        yield return null;//не работает
-
-        Canvas.ForceUpdateCanvases();
-        LayoutRebuilder.ForceRebuildLayoutImmediate(_content);
-        Canvas.ForceUpdateCanvases();
-
-        _scrollRect.verticalNormalizedPosition = 1f;
-        _scrollRect.StopMovement();
-        _scrollRect.velocity = Vector2.zero;
-    }
 
     public void RebuildPages()
     {

@@ -5,28 +5,28 @@ public class GalleryUIHandler : IDisposable
 {
     private readonly GalleryUI _galleryUI;
     private readonly GalleryConfig _galleryConfig;
-    private readonly CarouselScrolling _carouselScrolling;
+    private readonly GalleryBuilderUI _galleryBuilderUI;
 
     private List<int> _currentIds;
 
-    public GalleryUIHandler(GalleryUI galleryUI, GalleryConfig galleryConfig, CarouselScrolling carouselScrolling)
+    public GalleryUIHandler(GalleryUI galleryUI, GalleryConfig galleryConfig, GalleryBuilderUI galleryBuilderUI)
     {
         _galleryUI = galleryUI;
         _galleryConfig = galleryConfig;
-        _carouselScrolling = carouselScrolling;
+        _galleryBuilderUI = galleryBuilderUI;
 
         _galleryUI.FilterApplied += OnFilterApplied;
     }
 
+    public void Dispose() =>
+        _galleryUI.FilterApplied -= OnFilterApplied;
+
     private void OnFilterApplied(GalleryFilter filter)
     {
         _currentIds = GalleryFilterBuilder.BuildIds(_galleryConfig.MinImages, _galleryConfig.TotalImages, filter);
-        _carouselScrolling.ResetVerticalPosition();
+        _galleryUI.ResetVerticalPosition();
         //TODO:
         //_virtualGrid.SetData(_currentIds, _config.baseUrl); 
-        //GalleryBuilder.OnFilterApplied(filter); вызывается после _virtualGrid.SetData млм прям вот там же
+        _galleryBuilderUI.OnFilterApplied(filter);// вызывается после _virtualGrid.SetData или прям вот там же
     }
-
-    public void Dispose() =>
-        _galleryUI.FilterApplied -= OnFilterApplied;
 }

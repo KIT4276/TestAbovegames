@@ -4,17 +4,20 @@ public class ServiceLocator : MonoBehaviour
 {
     [SerializeField] private GalleryUI _galleryUI;
     [SerializeField] private GalleryConfig _config;
-    [SerializeField] private CarouselScrolling _carouselScrolling;
+    [SerializeField] private GalleryBuilderUI _galleryBuilderUI;
+    [SerializeField] private RemoteSpriteService _remoteSpriteService;
 
     public GalleryFilterBuilder GalleryFilterBuilder { get; private set; }
     public GalleryConfig Config => _config; 
-    public CarouselScrolling CarouselScrolling => _carouselScrolling;
     public GalleryUIHandler GalleryUIHandler { get; private set; }
+
 
     private void Awake()
     {
         GalleryFilterBuilder = new();
-        GalleryUIHandler = new(_galleryUI, _config, _carouselScrolling);
+        GalleryUIHandler = new(_galleryUI, _config, _galleryBuilderUI);
+
+        _galleryBuilderUI.Init(_remoteSpriteService, _config);
     }
 
     private void OnDestroy()
