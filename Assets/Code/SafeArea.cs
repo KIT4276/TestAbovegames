@@ -13,7 +13,7 @@ public class SafeArea : MonoBehaviour
 
     private void Awake()
     {
-        if (_rt != null)
+        if (_rt == null)
             _rt = GetComponent<RectTransform>();
 
         ApplySafeArea();

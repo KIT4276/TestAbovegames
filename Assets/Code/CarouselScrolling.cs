@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -32,13 +33,16 @@ public class CarouselScrolling : MonoBehaviour, IBeginDragHandler, IEndDragHandl
     private float _autoTimer;
 
     private Coroutine _snapRoutine;
+    private readonly List<float> _pageX = new();
 
     private void Awake()
     {
         if (!_scrollRect) _scrollRect = GetComponent<ScrollRect>();
+        if (!_viewport) _viewport = _scrollRect.viewport;
+        if (!_content) _content = _scrollRect.content;
 
-        _viewport = _scrollRect.viewport;
-        _content = _scrollRect.content;
+        //_viewport = _scrollRect.viewport;
+        //_content = _scrollRect.content;
     }
 
     private void OnEnable()
@@ -60,12 +64,42 @@ public class CarouselScrolling : MonoBehaviour, IBeginDragHandler, IEndDragHandl
         }
     }
 
-
     public void RebuildPages()
     {
         if (!_content) return;
+
+        // ѕринудительно обновим layout, чтобы позиции детей были актуальны
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(_content);
+        Canvas.ForceUpdateCanvases();
+
         _pageCount = _content.childCount;
         _currentPage = Mathf.Clamp(_currentPage, 0, Mathf.Max(0, _pageCount - 1));
+
+        _pageX.Clear();
+        if (_pageCount == 0) return;
+
+        // —читаем целевые позиции при content.anchoredPosition = 0
+        Vector2 saved = _content.anchoredPosition;
+        _content.anchoredPosition = Vector2.zero;
+
+        Canvas.ForceUpdateCanvases();
+
+        for (int i = 0; i < _pageCount; i++)
+        {
+            RectTransform child = (RectTransform)_content.GetChild(i);
+
+            // ÷ентр child в координатах viewport
+            Vector3 childCenterWorld = child.TransformPoint(child.rect.center);
+            Vector3 childCenterInViewport = _viewport.InverseTransformPoint(childCenterWorld);
+
+            // ¬ viewport центр = 0 по X (если pivot viewport 0.5), значит нужно сдвинуть content на -childCenterX
+            float targetX = -childCenterInViewport.x;
+
+            _pageX.Add(ClampContentX(targetX));
+        }
+
+        _content.anchoredPosition = saved;
 
         PageChanged?.Invoke(_currentPage);
     }
@@ -183,5 +217,16 @@ public class CarouselScrolling : MonoBehaviour, IBeginDragHandler, IEndDragHandl
 
         _scrollRect.horizontalNormalizedPosition = targetNormalized;
         _snapRoutine = null;
+    }
+
+    private float ClampContentX(float x)
+    {
+        float contentW = _content.rect.width;
+        float viewportW = _viewport.rect.width;
+
+        float minX = -Mathf.Max(0f, contentW - viewportW); // самый правый предел
+        float maxX = 0f;                                   // самый левый предел
+
+        return Mathf.Clamp(x, minX, maxX);
     }
 }

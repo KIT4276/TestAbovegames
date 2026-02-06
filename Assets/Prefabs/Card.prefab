@@ -202,6 +202,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _image: {fileID: 5402727836163135522}
   _card: {fileID: 2257021140348453305}
+  _rectTransform: {fileID: 2917113939284107213}
 --- !u!1 &8076298745076909507
 GameObject:
   m_ObjectHideFlags: 0

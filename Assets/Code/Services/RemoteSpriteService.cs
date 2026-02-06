@@ -21,8 +21,6 @@ public class RemoteSpriteService :MonoBehaviour, IRemoteSpriteService
 
     public void Load(string url, Action<Sprite> onSuccess, Action<string> onError = null)
     {
-        Debug.Log("Load");
-        
         if (string.IsNullOrEmpty(url))
         {
             if (onError != null) onError("URL is null or empty.");

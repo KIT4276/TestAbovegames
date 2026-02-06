@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,4 +15,5 @@ public class GalleryElement : MonoBehaviour
 
     public void Activate(bool isActive) => 
         _card.SetActive(isActive);
+
 }

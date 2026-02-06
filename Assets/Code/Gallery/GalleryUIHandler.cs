@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 public class GalleryUIHandler : IDisposable
 {
-    private readonly GalleryUI _galleryUI;
+    private readonly GalleryFilterUI _galleryUI;
     private readonly GalleryConfig _galleryConfig;
     private readonly GalleryBuilderUI _galleryBuilderUI;
 
     private List<int> _currentIds;
 
-    public GalleryUIHandler(GalleryUI galleryUI, GalleryConfig galleryConfig, GalleryBuilderUI galleryBuilderUI)
+    public GalleryUIHandler(GalleryFilterUI galleryUI, GalleryConfig galleryConfig, GalleryBuilderUI galleryBuilderUI)
     {
         _galleryUI = galleryUI;
         _galleryConfig = galleryConfig;

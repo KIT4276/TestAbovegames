@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GalleryUI : MonoBehaviour
+public class GalleryFilterUI : MonoBehaviour
 {
     [SerializeField] private Toggle _allToggle;
     [SerializeField] private Toggle _oddToggle;
@@ -14,15 +14,19 @@ public class GalleryUI : MonoBehaviour
 
     public event Action<GalleryFilter> FilterApplied;
 
-    private GalleryFilter _currentFilter;
+    private GalleryFilter _currentFilter = GalleryFilter.Odd;
 
     private void Awake()
     {
-        OnToggleChanged(true);
-
         _allToggle.onValueChanged.AddListener(OnToggleChanged);
         _oddToggle.onValueChanged.AddListener(OnToggleChanged);
         _evenToggle.onValueChanged.AddListener(OnToggleChanged);
+    }
+
+    private void Start()
+    {
+        _oddToggle.isOn = true;
+        ApplyFilter(GetCurrentFilter(), force: true);
     }
 
     public GalleryFilter GetCurrentFilter()
@@ -47,9 +51,10 @@ public class GalleryUI : MonoBehaviour
         StartCoroutine(ResetVerticalPositionRoutine());
     }
 
-    private void ApplyFilter(GalleryFilter filter)
+    private void ApplyFilter(GalleryFilter filter,bool force = false)
     {
-        if(_currentFilter == filter) return;
+        if(!force && _currentFilter == filter) return;
+
         _currentFilter = filter;
         FilterApplied?.Invoke(filter);
     }
