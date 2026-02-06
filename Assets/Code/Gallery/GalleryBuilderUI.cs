@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Xml.Linq;
 using UnityEngine;
-using UnityEngine.tvOS;
 
 public class GalleryBuilderUI : MonoBehaviour
 {
@@ -33,7 +31,6 @@ public class GalleryBuilderUI : MonoBehaviour
                 continue;
             }
 
-            //element.Activate(false);
             go.SetActive(false);
             list.Add(element);
         }

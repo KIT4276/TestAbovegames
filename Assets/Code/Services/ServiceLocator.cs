@@ -7,13 +7,12 @@ public class ServiceLocator : MonoBehaviour
     [SerializeField] private GalleryBuilderUI _galleryBuilderUI;
     [SerializeField] private RemoteSpriteService _remoteSpriteService;
 
-    private GalleryUIHandler _galleryUIHandler ;//{ get; private set; }
+    private GalleryUIHandler _galleryUIHandler ;
 
 
     private void Awake()
     {
         _galleryUIHandler = new(_galleryUI, _config, _galleryBuilderUI);
-
         _galleryBuilderUI.Init(_remoteSpriteService, _config);
     }
 

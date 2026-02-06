@@ -25,8 +25,7 @@ public class GalleryUIHandler : IDisposable
     {
         _currentIds = GalleryFilterBuilder.BuildIds(_galleryConfig.MinImages, _galleryConfig.TotalImages, filter);
         _galleryUI.ResetVerticalPosition();
-        //TODO:
-        //_virtualGrid.SetData(_currentIds, _config.baseUrl); 
-        _galleryBuilderUI.OnFilterApplied(filter);// вызывается после _virtualGrid.SetData или прям вот там же
+
+        _galleryBuilderUI.OnFilterApplied(filter);
     }
 }

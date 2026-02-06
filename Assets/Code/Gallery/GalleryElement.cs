@@ -1,23 +1,12 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class GalleryElement : MonoBehaviour
 {
     [SerializeField] private Image _image;
-    [SerializeField] private GameObject _card;
     [SerializeField]  private GameObject _premiumBadge;
 
     public int BoundId { get; private set; }
-
-    public void SetImage(Sprite sprite)
-    {
-        //Activate(true);
-        _image.sprite = sprite;
-    }
-
-    //public void Activate(bool isActive) => 
-    //    _card.SetActive(isActive);
 
     public void ApplySpriteIfStillBound(int id, Sprite sprite)
     {
