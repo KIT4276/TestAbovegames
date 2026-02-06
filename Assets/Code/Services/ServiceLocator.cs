@@ -1,20 +1,31 @@
 using UnityEngine;
+using UnityEngine.tvOS;
 
 public class ServiceLocator : MonoBehaviour
 {
     [SerializeField] private GalleryFilterUI _galleryUI;
     [SerializeField] private GalleryConfig _config;
-    [SerializeField] private GalleryBuilderUI _galleryBuilderUI;
-    [SerializeField] private RemoteSpriteService _remoteSpriteService;
+    //[SerializeField] private RemoteSpriteService _remoteSpriteService;
+    [SerializeField] private RemoteSpriteService _remote;
+    [SerializeField] private GalleryVirtualGridView _gridView;
 
-    private GalleryUIHandler _galleryUIHandler ;//{ get; private set; }
+    private GalleryVirtualGridController _gridController;
+
+    private GalleryUIHandler _galleryUIHandler ;
 
 
     private void Awake()
     {
-        _galleryUIHandler = new(_galleryUI, _config, _galleryBuilderUI);
+        var layout = new VirtualGridLayout(
+       spacing: new Vector2(24, 24),
+       padding: new RectOffset(24, 24, 24, 24),
+        cellHeight: 360f);
 
-        _galleryBuilderUI.Init(_remoteSpriteService, _config);
+        var binder = new GalleryItemBinder(_remote, _config);
+
+        _gridController = new GalleryVirtualGridController(_gridView, layout, binder, bufferRows: 2);
+
+        _galleryUIHandler = new(_galleryUI, _config, _gridController);
     }
 
     private void OnDestroy()

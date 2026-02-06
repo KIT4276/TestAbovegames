@@ -999,8 +999,8 @@ GameObject:
   - component: {fileID: 321307240}
   - component: {fileID: 321307242}
   - component: {fileID: 321307241}
-  - component: {fileID: 321307244}
   - component: {fileID: 321307245}
+  - component: {fileID: 321307246}
   m_Layer: 5
   m_Name: Gallery
   m_TagString: Untagged
@@ -1066,20 +1066,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 321307239}
   m_CullTransparentMesh: 1
---- !u!114 &321307244
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 321307239}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 41a9324b0b28c3e499d4f91dd91f8690, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _cardPrefab: {fileID: 7282191440232185465, guid: 09113a7f19db5b34ea7b246a43f95cab, type: 3}
-  _content: {fileID: 1878508608}
 --- !u!114 &321307245
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1097,6 +1083,22 @@ MonoBehaviour:
   _evenToggle: {fileID: 836043255}
   _scrollRect: {fileID: 778998481}
   _content: {fileID: 1878508608}
+--- !u!114 &321307246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 321307239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1239c931dd3b9f47be696b51124bc8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _scrollRect: {fileID: 778998481}
+  _viewport: {fileID: 576483125}
+  _content: {fileID: 1878508608}
+  _cardPrefab: {fileID: 3125029680679701129, guid: 09113a7f19db5b34ea7b246a43f95cab, type: 3}
 --- !u!1 &376932959
 GameObject:
   m_ObjectHideFlags: 0
@@ -2341,8 +2343,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _galleryUI: {fileID: 321307245}
   _config: {fileID: 11400000, guid: 70f6ce73628487e4d8f56ed75deedb48, type: 2}
-  _galleryBuilderUI: {fileID: 321307244}
-  _remoteSpriteService: {fileID: 376932960}
+  _remote: {fileID: 376932960}
+  _gridView: {fileID: 321307246}
 --- !u!4 &848309020
 Transform:
   m_ObjectHideFlags: 0

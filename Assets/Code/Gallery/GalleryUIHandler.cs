@@ -5,15 +5,16 @@ public class GalleryUIHandler : IDisposable
 {
     private readonly GalleryFilterUI _galleryUI;
     private readonly GalleryConfig _galleryConfig;
-    private readonly GalleryBuilderUI _galleryBuilderUI;
+    private readonly GalleryVirtualGridController _gridController;
 
     private List<int> _currentIds;
 
-    public GalleryUIHandler(GalleryFilterUI galleryUI, GalleryConfig galleryConfig, GalleryBuilderUI galleryBuilderUI)
+    public GalleryUIHandler(GalleryFilterUI galleryUI, GalleryConfig galleryConfig, 
+       GalleryVirtualGridController gridController)
     {
         _galleryUI = galleryUI;
         _galleryConfig = galleryConfig;
-        _galleryBuilderUI = galleryBuilderUI;
+        _gridController = gridController;
 
         _galleryUI.FilterApplied += OnFilterApplied;
     }
@@ -25,8 +26,7 @@ public class GalleryUIHandler : IDisposable
     {
         _currentIds = GalleryFilterBuilder.BuildIds(_galleryConfig.MinImages, _galleryConfig.TotalImages, filter);
         _galleryUI.ResetVerticalPosition();
-        //TODO:
-        //_virtualGrid.SetData(_currentIds, _config.baseUrl); 
-        _galleryBuilderUI.OnFilterApplied(filter);// вызывается после _virtualGrid.SetData или прям вот там же
+
+        _gridController.SetData(_currentIds);
     }
 }
