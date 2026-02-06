@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Xml.Linq;
 using UnityEngine;
+using UnityEngine.tvOS;
 
 public class GalleryBuilderUI : MonoBehaviour
 {
     [SerializeField] private GameObject _cardPrefab;
     [SerializeField] private RectTransform _content;
+    [SerializeField] private GalleryLazyLoader _lazyLoader;
 
     private GalleryElement[] _galleryElements;
 
@@ -16,7 +19,7 @@ public class GalleryBuilderUI : MonoBehaviour
         _remoteSpriteService = remoteSpriteService;
         _config = config;
 
-        List<GalleryElement> elements = new();
+        List<GalleryElement> list = new();
 
         for (int i = 0; i < _config.TotalImages; i++)
         {
@@ -30,29 +33,18 @@ public class GalleryBuilderUI : MonoBehaviour
                 continue;
             }
 
-            element.Activate(false);
-            elements.Add(element);
+            //element.Activate(false);
+            go.SetActive(false);
+            list.Add(element);
         }
-
-        _galleryElements = elements.ToArray();
+        _galleryElements = list.ToArray();
+        _lazyLoader.Init(_remoteSpriteService, _config, _galleryElements);
     }
 
     public void OnFilterApplied(GalleryFilter filter)
     {
         var ids = GalleryFilterBuilder.BuildIds(_config.MinImages, _config.TotalImages, filter);
-
-        for (int i = ids.Count; i < _galleryElements.Length; i++)
-            _galleryElements[i].Activate(false);
-
-        for (int i = 0; i < ids.Count && i < _galleryElements.Length; i++)
-        {
-            int id = ids[i];
-            _remoteSpriteService.Load(
-                _config.GetUrl(id),
-                onSuccess: _galleryElements[i].SetImage,
-                onError: OnLoadError
-            );
-        }
+        _lazyLoader.SetIds(ids);
     }
 
     private void OnLoadError(string message) =>

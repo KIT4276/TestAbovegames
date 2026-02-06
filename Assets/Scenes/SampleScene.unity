@@ -1001,6 +1001,7 @@ GameObject:
   - component: {fileID: 321307241}
   - component: {fileID: 321307244}
   - component: {fileID: 321307245}
+  - component: {fileID: 321307246}
   m_Layer: 5
   m_Name: Gallery
   m_TagString: Untagged
@@ -1080,6 +1081,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cardPrefab: {fileID: 7282191440232185465, guid: 09113a7f19db5b34ea7b246a43f95cab, type: 3}
   _content: {fileID: 1878508608}
+  _lazyLoader: {fileID: 321307246}
 --- !u!114 &321307245
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1097,6 +1099,23 @@ MonoBehaviour:
   _evenToggle: {fileID: 836043255}
   _scrollRect: {fileID: 778998481}
   _content: {fileID: 1878508608}
+--- !u!114 &321307246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 321307239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51c02ca1fbb80cd4e9483557cb415376, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _scrollRect: {fileID: 778998481}
+  _viewport: {fileID: 576483125}
+  _content: {fileID: 1878508608}
+  _grid: {fileID: 1878508609}
+  _bufferRows: 2
 --- !u!1 &376932959
 GameObject:
   m_ObjectHideFlags: 0
