@@ -12,7 +12,7 @@ public class GalleryBuilderUI : MonoBehaviour
     private IRemoteSpriteService _remoteSpriteService;
     private GalleryConfig _config;
 
-    public void Init(IRemoteSpriteService remoteSpriteService, GalleryConfig config)
+    public void Init(IRemoteSpriteService remoteSpriteService, GalleryConfig config, Popups popups)
     {
         _remoteSpriteService = remoteSpriteService;
         _config = config;
@@ -35,6 +35,10 @@ public class GalleryBuilderUI : MonoBehaviour
             list.Add(element);
         }
         _galleryElements = list.ToArray();
+
+        foreach (var element in _galleryElements)
+            element.Init(popups);
+
         _lazyLoader.Init(_remoteSpriteService, _config, _galleryElements);
     }
 

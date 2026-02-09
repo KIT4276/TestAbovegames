@@ -6,6 +6,7 @@ public class ServiceLocator : MonoBehaviour
     [SerializeField] private GalleryConfig _config;
     [SerializeField] private GalleryBuilderUI _galleryBuilderUI;
     [SerializeField] private RemoteSpriteService _remoteSpriteService;
+    [SerializeField] private Popups _popups;
 
     private GalleryUIHandler _galleryUIHandler ;
 
@@ -13,7 +14,7 @@ public class ServiceLocator : MonoBehaviour
     private void Awake()
     {
         _galleryUIHandler = new(_galleryUI, _config, _galleryBuilderUI);
-        _galleryBuilderUI.Init(_remoteSpriteService, _config);
+        _galleryBuilderUI.Init(_remoteSpriteService, _config, _popups);
     }
 
     private void OnDestroy()
