@@ -14,7 +14,11 @@ public abstract class BasePopup : MonoBehaviour
     {
         _onExit = () => CloseClick?.Invoke();
         _exitButton.onClick.AddListener(_onExit);
+
+
     }
+
+
 
     protected virtual void OnDestroy()
     {

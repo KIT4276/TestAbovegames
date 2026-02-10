@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class RemoteSpriteService :MonoBehaviour, IRemoteSpriteService
+public class RemoteSpriteService : MonoBehaviour, IRemoteSpriteService
 {
     [Header("Network")]
-    [SerializeField] private int _maxParallelRequests = 4;
-    [SerializeField] private int _timeoutSeconds = 15;
+    [SerializeField] private int _maxParallelRequests = 1;
+    [SerializeField] private int _timeoutSeconds = 60;
+    [SerializeField] private float _retryCooldownSeconds = 10f;
 
     [Header("Sprite")]
     [SerializeField] private float _pixelsPerUnit = 100f;
@@ -16,6 +17,7 @@ public class RemoteSpriteService :MonoBehaviour, IRemoteSpriteService
     private readonly Dictionary<string, Sprite> _cache = new Dictionary<string, Sprite>();
     private readonly Dictionary<string, List<Action<Sprite>>> _pending = new Dictionary<string, List<Action<Sprite>>>();
     private readonly Queue<string> _queue = new Queue<string>();
+    private readonly Dictionary<string, float> _cooldownUntil = new();
 
     private int _inFlight;
 
@@ -24,6 +26,12 @@ public class RemoteSpriteService :MonoBehaviour, IRemoteSpriteService
         if (string.IsNullOrEmpty(url))
         {
             if (onError != null) onError("URL is null or empty.");
+            return;
+        }
+
+        if (_cooldownUntil.TryGetValue(url, out var until) && Time.unscaledTime < until)
+        {
+            onError?.Invoke($"Cooldown: {url}");
             return;
         }
 
@@ -88,60 +96,72 @@ public class RemoteSpriteService :MonoBehaviour, IRemoteSpriteService
 
     private IEnumerator LoadRoutine(string url, Action<string> onError)
     {
-        using (UnityWebRequest req = UnityWebRequestTexture.GetTexture(url, true)) // true = nonReadable (экономия памяти)
+        try
         {
-            req.timeout = _timeoutSeconds;
 
-            yield return req.SendWebRequest();
-
-            if (req.result != UnityWebRequest.Result.Success)
+            using (UnityWebRequest req = UnityWebRequestTexture.GetTexture(url, true)) // true = nonReadable (экономия памяти)
             {
-                Fail(url, req.error, onError);
-                yield break;
-            }
+                req.timeout = _timeoutSeconds;
 
-            Texture2D tex = DownloadHandlerTexture.GetContent(req);
-            if (tex == null)
-            {
-                Fail(url, "Texture is null.", onError);
-                yield break;
-            }
+                Debug.Log($"[Net] START {url} timeout={req.timeout}");
 
-            Sprite sprite = Sprite.Create(
-                tex,
-                new Rect(0f, 0f, tex.width, tex.height),
-                new Vector2(0.5f, 0.5f),
-                _pixelsPerUnit
-            );
+                yield return req.SendWebRequest();
 
-            sprite.name = "RemoteSprite_" + url;
+                Debug.Log($"[Net] END {url} result={req.result} code={req.responseCode} err={req.error} bytes={req.downloadedBytes}");
 
-            _cache[url] = sprite;
-
-            List<Action<Sprite>> callbacks;
-            if (_pending.TryGetValue(url, out callbacks))
-            {
-                _pending.Remove(url);
-                for (int i = 0; i < callbacks.Count; i++)
+                if (req.result != UnityWebRequest.Result.Success)
                 {
-                    Action<Sprite> cb = callbacks[i];
-                    if (cb != null) cb(sprite);
+                    Fail(url, req.error, onError);
+                    yield break;
+                }
+
+                Texture2D tex = DownloadHandlerTexture.GetContent(req);
+                if (tex == null)
+                {
+                    Fail(url, "Texture is null.", onError);
+                    yield break;
+                }
+
+                Sprite sprite = Sprite.Create(
+                    tex,
+                    new Rect(0f, 0f, tex.width, tex.height),
+                    new Vector2(0.5f, 0.5f),
+                    _pixelsPerUnit
+                );
+
+                sprite.name = "RemoteSprite_" + url;
+
+                _cache[url] = sprite;
+
+                List<Action<Sprite>> callbacks;
+                if (_pending.TryGetValue(url, out callbacks))
+                {
+                    _pending.Remove(url);
+                    for (int i = 0; i < callbacks.Count; i++)
+                    {
+                        Action<Sprite> cb = callbacks[i];
+                        if (cb != null) cb(sprite);
+                    }
                 }
             }
         }
-
-        _inFlight--;
-        TryStartNext(onError);
+        finally
+        {
+            _inFlight--;
+            TryStartNext(onError);
+        }
     }
 
     private void Fail(string url, string error, Action<string> onError)
     {
+
         if (onError != null) onError("Failed to load sprite: " + url + " | " + error);
 
         _pending.Remove(url);
+        _cooldownUntil[url] = Time.unscaledTime + _retryCooldownSeconds;
 
-        _inFlight--;
-        TryStartNext(onError);
+        //_inFlight--;
+        // TryStartNext(onError);
     }
 }
 

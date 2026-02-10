@@ -12,6 +12,7 @@ public class GalleryLazyLoader : MonoBehaviour
 
     [Header("Tuning")]
     [SerializeField] private int _bufferRows = 2;
+    [SerializeField] private int _maxNewRequestsPerUpdate = 10;
 
     private IRemoteSpriteService _remote;
     private GalleryConfig _config;
@@ -49,7 +50,7 @@ public class GalleryLazyLoader : MonoBehaviour
             {
                 int id = _ids[i];
                 _elements[i].gameObject.SetActive(true);
-                 _elements[i].Bind(id, (id % 4) == 0); 
+                _elements[i].Bind(id, (id % 4) == 0);
             }
             else
             {
@@ -83,28 +84,37 @@ public class GalleryLazyLoader : MonoBehaviour
         int firstIndex = firstRow * columns;
         int lastIndex = Mathf.Min(_ids.Count - 1, (lastRow * columns) + (columns - 1));
 
+        int started = 0;
+
         for (int i = firstIndex; i <= lastIndex; i++)
         {
+            if (started >= _maxNewRequestsPerUpdate) break;
+
             int id = _ids[i];
             string url = _config.GetUrl(id);
 
             if (_requested.Contains(url)) continue;
-            _requested.Add(url);
 
             var element = _elements[i];
 
             if (_remote.TryGetCached(url, out var cached) && cached != null)
             {
+                _requested.Add(url);
                 element.ApplySpriteIfStillBound(id, cached);
                 continue;
             }
+
+            _requested.Add(url);
+            started++;
+
+            Debug.Log($"[Gallery] enqueue id={id} url={url}");
 
             _remote.Load(
                 url,
                 onSuccess: sprite => element.ApplySpriteIfStillBound(id, sprite),
                 onError: msg =>
                 {
-                    _requested.Remove(url); 
+                    _requested.Remove(url);
                     Debug.LogError(msg);
                 }
             );
